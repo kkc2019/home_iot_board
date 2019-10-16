@@ -6,7 +6,7 @@
  It will use several components of the board and you need to install corresponding libraries :
    * Low energy Bluetooth (SPBTLE_RF) : https://github.com/stm32duino/SPBTLE-RF
    * Temperature and pressure sensor (LPS22HB) : https://github.com/stm32duino/LPS22HB
-   * Temperature and humidity sensor (HTS221) : https://github.com/stm32duino/HTS221
+   * Temperature and humidity sensor (HTS221) : https://github.com/stm32duino/HTS221STM32Examples-master
    * Time of flight sensor (VL53L0X) : https://github.com/stm32duino/VL53L0X
 
  You can find more information on this board here :
@@ -74,11 +74,11 @@ uint32_t distance_top;                   // used for ToF gesture recognition
 uint32_t count_swipe;                    // count for swipe animation
 int axis_to_update;                      // axis to update on a swipe detection
 
-#define UPDATE_AXIS_X 0
 #define UPDATE_AXIS_Y 1
 #define UPDATE_AXIS_Z 2
 
 
+#define UPDATE_AXIS_X 0
 /***************************************************************************************
  * Private functions
  ***************************************************************************************/
@@ -249,6 +249,29 @@ bool tap_detected() {
 void update_environment_data(){
   float humidity, temperature;
   float pressure, temperature_lps22hb;
+  float swipe, tap;
+  String swipeStr, tapStr;
+
+  swipe = 0;
+  //tap = 100.0;
+  Serial.println("swipe!!!?");
+  Serial.println(swipe_detected());
+  swipeStr = ((String)swipe_detected());
+  Serial.println("swipeStr!!!?");
+  Serial.println(swipeStr);
+    if(((String)swipe_detected())[0] == '1') {
+    swipe = 1;
+  }
+
+  if(((String)swipe_detected())[0] == '1') {
+    swipe = 1;
+  }
+  //tapStr = ((String)tap_detected());
+
+   //Serial.println(tapStr);
+  //if(tapStr == "true") {
+  // tap = 1;
+  //}
 
   HumTemp->GetHumidity(&humidity);
   HumTemp->GetTemperature(&temperature);
@@ -256,10 +279,25 @@ void update_environment_data(){
   PressTemp->GetPressure(&pressure);
   PressTemp->GetTemperature(&temperature_lps22hb);
 
+ 
   //Update environnemental data
   SensorService.Temp_Update(temperature*10);
+  Serial.println(temperature*10);
   SensorService.Press_Update(pressure*100);
-  SensorService.Humidity_Update(humidity*10);
+  Serial.println(pressure*100);
+  SensorService.Humidity_Update(humidity*100);
+  Serial.println(humidity*10);
+  //if( swipe == 1 ) {
+    if(((String)swipe_detected())[0] == '1') {
+    swipe = 1;
+  }
+  SensorService.Swipe_Update(swipe);
+  //Serial.println(swipe);
+  //}
+  //if (tap == 1) {
+  //SensorService.Tap_Update(tap);
+  //Serial.println(tap);
+  //}
 }
 
 /**
