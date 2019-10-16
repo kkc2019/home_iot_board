@@ -1,0 +1,6 @@
+{
+    "sketch": "examples\\SPBTLE_SensorDemo\\SPBTLE_SensorDemo.ino",
+    "board": "arduino:avr:uno",
+    "port": "COM72",
+    "output": "../build"
+}
