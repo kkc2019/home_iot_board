@@ -124,8 +124,8 @@ class SensorServiceClass
     tBleStatus Seconds_Update(void);
     tBleStatus Minutes_Notify(void);
 
-    tBleStatus Add_LED_Service(void);
-    bool       LED_State(void) {return ledState;}
+    tBleStatus Add_Motor_Service(void);
+    bool       Motor_State(void) {return motorState;}
 
     void       GAP_ConnectionComplete_CB(uint8_t addr[BDADDR_SIZE], uint16_t handle);
     void       GAP_DisconnectionComplete_CB(void);
@@ -138,7 +138,7 @@ class SensorServiceClass
     uint16_t envSensServHandle, tempCharHandle, pressCharHandle, humidityCharHandle, swipeCharHandle, tapCharHandle;
 
     uint16_t timeServHandle, secondsCharHandle, minuteCharHandle;
-    uint16_t ledServHandle, ledButtonCharHandle;
+    uint16_t motorServHandle, motorButtonCharHandle;
 
   private:
     volatile uint16_t connection_handle = 0;
@@ -156,7 +156,7 @@ class SensorServiceClass
 
     char dev_name[8] =  {AD_TYPE_COMPLETE_LOCAL_NAME, DEFAULT_DEVICE_NAME};
     uint8_t dev_nameLen;
-    bool ledState = false;
+    bool motorState = false;
     uint32_t previousMinuteValue = 0;
 };
 

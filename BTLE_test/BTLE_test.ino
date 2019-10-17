@@ -8,26 +8,6 @@
    * Temperature and pressure sensor (LPS22HB) : https://github.com/stm32duino/LPS22HB
    * Temperature and humidity sensor (HTS221) : https://github.com/stm32duino/HTS221STM32Examples-master
    * Time of flight sensor (VL53L0X) : https://github.com/stm32duino/VL53L0X
-
- You can find more information on this board here :
-   http://www.st.com/en/evaluation-tools/b-l475e-iot01a.html
-
- This sketch will launch 3 services on BLE : Acc, Environnemental and Time.
- For testing the sketch, you need to download BlueNRG application from playstore provided by
- STMicroelectronics. (https://play.google.com/store/apps/details?id=com.st.blunrg for Android or
- https://itunes.apple.com/fr/app/bluenrg/id705873549?mt=8 for Apple)
- Compile and download the demo on your board, then, on your smartphone, enable Bluetooth, launch
- the application and connect it to the BLueNRG device. You will see all the services, you can
- click on each one.
-
- Temperature, humidity and pressure are sent to the environment service and updated on regular
- basis.
- To move the cube on motion tab, you have to swipe on top of the vl53l0x sensor. To change
- direction of the motion, use a tap. The gesture has to be done at less than 1 meter from the
- sensor.
-
- Do not forget to check information on the console.
-
  */
 
 #include <SPI.h>
@@ -253,25 +233,31 @@ void update_environment_data(){
   String swipeStr, tapStr;
 
   swipe = 0;
-  //tap = 100.0;
+  tap = 0;
+  
   Serial.println("swipe!!!?");
   Serial.println(swipe_detected());
   swipeStr = ((String)swipe_detected());
+  tapStr = ((String)tap_detected());
   Serial.println("swipeStr!!!?");
   Serial.println(swipeStr);
-    if(((String)swipe_detected())[0] == '1') {
+
+  Serial.println("tapStr!!!?");
+  Serial.println(tapStr);
+  
+ if(((String)swipe_detected())[0] == '1') {
     swipe = 1;
   }
-
+ if(((String)tap_detected())[0] == '1') {
+    tap = 1;
+  }
   if(((String)swipe_detected())[0] == '1') {
     swipe = 1;
   }
-  //tapStr = ((String)tap_detected());
+  if(((String)tap_detected())[0] == '1') {
+    tap = 1;
+  }
 
-   //Serial.println(tapStr);
-  //if(tapStr == "true") {
-  // tap = 1;
-  //}
 
   HumTemp->GetHumidity(&humidity);
   HumTemp->GetTemperature(&temperature);
@@ -287,27 +273,31 @@ void update_environment_data(){
   Serial.println(pressure*100);
   SensorService.Humidity_Update(humidity*100);
   Serial.println(humidity*10);
-  //if( swipe == 1 ) {
+
     if(((String)swipe_detected())[0] == '1') {
     swipe = 1;
   }
   SensorService.Swipe_Update(swipe);
-  //Serial.println(swipe);
+
+      if(((String)tap_detected())[0] == '1') {
+    tap = 1;
+  }
+  SensorService.Tap_Update(tap);
+
+ 
+
+  /*
+  if (digitalRead(USER_BTN) == HIGH) {
+    tap = 1;
+    SensorService.Tap_Update(tap);
+    Serial.println(tap);
+  }
   //}
-  //if (tap == 1) {
-  //SensorService.Tap_Update(tap);
-  //Serial.println(tap);
-  //}
+  */
 }
 
-/**
- * Update the motion data on BLE. This depends of user action in front of vl53l0x
- * sensor.
- * A tap will switch the axis to update and a swipe will rotate the cube
- *
- * @param  AxesRaw_t* p_axes
- * @retval None
- */
+
+/*
 void update_motion_data(AxesRaw_t* p_axes)
 {
   // change axis to update on each tap detection
@@ -349,7 +339,7 @@ void update_motion_data(AxesRaw_t* p_axes)
     SensorService.Acc_Update(p_axes);
   }
 }
-
+*/
 /***************************************************************************************
  * Arduino standard functions
  ***************************************************************************************/
@@ -377,6 +367,7 @@ void setup() {
 
   /* Configure the User Button in GPIO Mode */
   pinMode(USER_BTN, INPUT);
+
 
   // Initialize I2C bus.
   dev_i2c = new TwoWire(I2C2_SDA, I2C2_SCL);
@@ -434,8 +425,13 @@ void setup() {
     Serial.println("Time service added successfully.");
   else
     Serial.println("Error while adding Time service.");
-}
 
+   ret = SensorService.Add_Motor_Service();
+  if(ret == BLE_STATUS_SUCCESS)
+    Serial.println("LED service added successfully.");
+  else
+    Serial.println("Error while adding LED service.");
+}
 
 void loop() {
 
@@ -444,7 +440,7 @@ void loop() {
   if(SensorService.isConnected() == TRUE)
   {
     //Update accelerometer values
-    update_motion_data(&axes_data);
+    //update_motion_data(&axes_data);
 
     //Update time
     SensorService.Update_Time_Characteristics();
@@ -452,8 +448,13 @@ void loop() {
     if((millis() - previousSecond) >= 1000)
     {
       update_environment_data();
+      boolean pushdetected = SensorService.Motor_State();
+      Serial.println("pushdetected  "+ (String)(pushdetected));
       previousSecond = millis();
     }
+
+
+   
   }
   else
   {

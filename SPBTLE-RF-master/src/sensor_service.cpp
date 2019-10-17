@@ -91,16 +91,15 @@ do {\
 #define COPY_HUMIDITY_CHAR_UUID(uuid_struct)     COPY_UUID_128(uuid_struct,0x01,0xc5,0x0b,0x60, 0xe4,0x8c, 0x11,0xe2, 0xa0,0x73, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
 #define COPY_SWIPE_CHAR_UUID(uuid_struct)        COPY_UUID_128(uuid_struct,0x4c,0xcc,0x24,0xca, 0xe4,0x9d, 0x11,0xe2, 0xb0,0x74, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
 #define COPY_TAP_CHAR_UUID(uuid_struct)          COPY_UUID_128(uuid_struct,0xb8,0x03,0x0a,0x11, 0xe5,0x1e, 0x11,0xe2, 0xc0,0x75, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
-
 // Time service: uuid = 0x08, 0x36, 0x6e, 0x80, 0xcf, 0x3a, 0x11, 0xe1, 0x9a, 0xb4, 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b
 //      straight uuid = 0x08366e80cf3a11e19ab40002a5d5c51b
 #define COPY_TIME_SERVICE_UUID(uuid_struct)  COPY_UUID_128(uuid_struct,0x08,0x36,0x6e,0x80, 0xcf,0x3a, 0x11,0xe1, 0x9a,0xb4, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
 #define COPY_TIME_UUID(uuid_struct)          COPY_UUID_128(uuid_struct,0x09,0x36,0x6e,0x80, 0xcf,0x3a, 0x11,0xe1, 0x9a,0xb4, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
 #define COPY_MINUTE_UUID(uuid_struct)        COPY_UUID_128(uuid_struct,0x0a,0x36,0x6e,0x80, 0xcf,0x3a, 0x11,0xe1, 0x9a,0xb4, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
 
-// LED service
-#define COPY_LED_SERVICE_UUID(uuid_struct)  COPY_UUID_128(uuid_struct,0x0b,0x36,0x6e,0x80, 0xcf,0x3a, 0x11,0xe1, 0x9a,0xb4, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
-#define COPY_LED_UUID(uuid_struct)          COPY_UUID_128(uuid_struct,0x0c,0x36,0x6e,0x80, 0xcf,0x3a, 0x11,0xe1, 0x9a,0xb4, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
+// Motor service
+#define COPY_MOTOR_SERVICE_UUID(uuid_struct)  COPY_UUID_128(uuid_struct,0x0b,0x36,0x6e,0x80, 0xcf,0x3a, 0x11,0xe1, 0x9a,0xb4, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
+#define COPY_MOTOR_UUID(uuid_struct)          COPY_UUID_128(uuid_struct,0x0c,0x36,0x6e,0x80, 0xcf,0x3a, 0x11,0xe1, 0x9a,0xb4, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
 
 
 /* Store Value into a buffer in Little Endian Format */
@@ -337,7 +336,7 @@ tBleStatus SensorServiceClass::Add_Environmental_Sensor_Service(void)
   uint16_t descHandle;
 
   COPY_ENV_SENS_SERVICE_UUID(uuid);
-  ret = aci_gatt_add_serv(UUID_TYPE_128,  uuid, PRIMARY_SERVICE, 12,
+  ret = aci_gatt_add_serv(UUID_TYPE_128,  uuid, PRIMARY_SERVICE, 16,
                           &envSensServHandle);
   if (ret != BLE_STATUS_SUCCESS) goto fail;
 
@@ -945,17 +944,17 @@ void SensorServiceClass::Update_Time_Characteristics(void) {
 }
 
 /*
- * @brief  Add LED button service using a vendor specific profile.
+ * @brief  Add Motor button service using a vendor specific profile.
  * @param  None
  * @retval Status
  */
-tBleStatus SensorServiceClass::Add_LED_Service(void)
+tBleStatus SensorServiceClass::Add_Motor_Service(void)
 {
   tBleStatus ret;
   uint8_t uuid[16];
 
   /* copy "LED service UUID" defined above to 'uuid' local variable */
-  COPY_LED_SERVICE_UUID(uuid);
+  COPY_MOTOR_SERVICE_UUID(uuid);
   /*
    * now add "LED service" to GATT server, service handle is returned
    * via 'ledServHandle' parameter of aci_gatt_add_serv() API.
@@ -963,11 +962,11 @@ tBleStatus SensorServiceClass::Add_LED_Service(void)
    * API description
   */
   ret = aci_gatt_add_serv(UUID_TYPE_128, uuid, PRIMARY_SERVICE, 7,
-                          &ledServHandle);
+                          &motorServHandle);
   if (ret != BLE_STATUS_SUCCESS) goto fail;
 
   /* copy "LED button characteristic UUID" defined above to 'uuid' local variable */
-  COPY_LED_UUID(uuid);
+  COPY_MOTOR_UUID(uuid);
   /*
    * now add "LED button characteristic" to LED service, characteristic handle
    * is returned via 'ledButtonCharHandle' parameter of aci_gatt_add_char() API.
@@ -975,16 +974,16 @@ tBleStatus SensorServiceClass::Add_LED_Service(void)
    * Please refer to 'BlueNRG Application Command Interface.pdf' for detailed
    * API description
   */
-  ret =  aci_gatt_add_char(ledServHandle, UUID_TYPE_128, uuid, 4,
+  ret =  aci_gatt_add_char(motorServHandle, UUID_TYPE_128, uuid, 4,
                            CHAR_PROP_WRITE | CHAR_PROP_WRITE_WITHOUT_RESP, ATTR_PERMISSION_NONE, GATT_NOTIFY_ATTRIBUTE_WRITE,
-                           16, 1, &ledButtonCharHandle);
+                           16, 1, &motorButtonCharHandle);
   if (ret != BLE_STATUS_SUCCESS) goto fail;
 
-  PRINTF("Service LED BUTTON added. Handle 0x%04X, LED button Charac handle: 0x%04X\n",ledServHandle, ledButtonCharHandle);
+  PRINTF("Service Motor BUTTON added. Handle 0x%04X, Motor button Charac handle: 0x%04X\n",motorServHandle, motorButtonCharHandle);
   return BLE_STATUS_SUCCESS;
 
 fail:
-  PRINTF("Error while adding LED service.\n");
+  PRINTF("Error while adding Motor service.\n");
   return BLE_STATUS_ERROR;
 }
 
@@ -1002,8 +1001,8 @@ void SensorServiceClass::Attribute_Modified_CB(uint16_t handle, uint8_t data_len
   UNUSED(att_data);
 
   /* If GATT client has modified 'LED button characteristic' value, toggle LED2 */
-  if(handle == ledButtonCharHandle + 1){
-      ledState = !ledState;
+  if(handle == motorButtonCharHandle + 1){
+      motorState = !motorState;
   }
 }
 /**
