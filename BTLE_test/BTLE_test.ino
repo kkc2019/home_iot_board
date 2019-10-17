@@ -269,9 +269,10 @@ void update_environment_data(){
  
   //Update environnemental data
   SensorService.Temp_Update(temperature*10);
-  Serial.println(temperature*10);
+  Serial.println(temperature*10);/*
   SensorService.Press_Update(pressure*100);
   Serial.println(pressure*100);
+  */
   SensorService.Humidity_Update(humidity*100);
   Serial.println(humidity*10);
 
@@ -288,17 +289,18 @@ void update_environment_data(){
   Serial.println("Now we update Motor value from board to python");
   SensorService.Motor_Update();
 
-  /*
-  if (digitalRead(USER_BTN) == HIGH) {
+
+  if (digitalRead(USER_BTN) == 0) {
     button = 1;
     SensorService.Button_Update(button);
     Serial.println("Button Pushed!!");
   }
   else {
-     button = 0;
+    button = 0;
     SensorService.Button_Update(button);
+    Serial.println("Button N O T pushed!!");
   }
-  */
+  
 
   
 }

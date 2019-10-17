@@ -87,7 +87,7 @@ do {\
 
 #define COPY_ENV_SENS_SERVICE_UUID(uuid_struct)  COPY_UUID_128(uuid_struct,0x42,0x82,0x1a,0x40, 0xe4,0x77, 0x11,0xe2, 0x82,0xd0, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
 #define COPY_TEMP_CHAR_UUID(uuid_struct)         COPY_UUID_128(uuid_struct,0xa3,0x2e,0x55,0x20, 0xe4,0x77, 0x11,0xe2, 0xa9,0xe3, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
-#define COPY_PRESS_CHAR_UUID(uuid_struct)        COPY_UUID_128(uuid_struct,0xcd,0x20,0xc4,0x80, 0xe4,0x8b, 0x11,0xe2, 0x84,0x0b, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
+#define COPY_BUTTON_CHAR_UUID(uuid_struct)        COPY_UUID_128(uuid_struct,0xcd,0x20,0xc4,0x80, 0xe4,0x8b, 0x11,0xe2, 0x84,0x0b, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
 #define COPY_HUMIDITY_CHAR_UUID(uuid_struct)     COPY_UUID_128(uuid_struct,0x01,0xc5,0x0b,0x60, 0xe4,0x8c, 0x11,0xe2, 0xa0,0x73, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
 #define COPY_SWIPE_CHAR_UUID(uuid_struct)        COPY_UUID_128(uuid_struct,0x4c,0xcc,0x24,0xca, 0xe4,0x9d, 0x11,0xe2, 0xb0,0x74, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
 #define COPY_TAP_CHAR_UUID(uuid_struct)          COPY_UUID_128(uuid_struct,0xb8,0x03,0x0a,0x11, 0xe5,0x1e, 0x11,0xe2, 0xc0,0x75, 0x00,0x02,0xa5,0xd5,0xc5,0x1b)
@@ -375,23 +375,23 @@ tBleStatus SensorServiceClass::Add_Environmental_Sensor_Service(void)
  
 
   /* Pressure Characteristic */
-  COPY_PRESS_CHAR_UUID(uuid);
+  COPY_BUTTON_CHAR_UUID(uuid);
   ret =  aci_gatt_add_char(envSensServHandle, UUID_TYPE_128, uuid, 3,
                            CHAR_PROP_READ, ATTR_PERMISSION_NONE,
                            GATT_NOTIFY_READ_REQ_AND_WAIT_FOR_APPL_RESP,
-                           16, 0, &pressCharHandle);
+                           16, 0, &buttonCharHandle);
   if (ret != BLE_STATUS_SUCCESS) goto fail;
 
-  charFormat.format = FORMAT_UINT32;
+  charFormat.format = FORMAT_UINT16;
   charFormat.exp = -1;
-  charFormat.unit = UNIT_PRESSURE_PASCAL;
+  charFormat.unit = UNIT_PERCENTAGE;
   charFormat.name_space = 0;
   charFormat.desc = 0;
 
   uuid16 = CHAR_FORMAT_DESC_UUID;
 
   ret = aci_gatt_add_char_desc(envSensServHandle,
-                               pressCharHandle,
+                               buttonCharHandle,
                                UUID_TYPE_16,
                                (uint8_t *)&uuid16,
                                7,
@@ -502,7 +502,7 @@ tBleStatus SensorServiceClass::Add_Environmental_Sensor_Service(void)
 
 
 
-  PRINTF("Service ENV_SENS added. Handle 0x%04X, TEMP Charac handle: 0x%04X, PRESS Charac handle: 0x%04X, HUMID Charac handle: 0x%04X\n",envSensServHandle, tempCharHandle, pressCharHandle, humidityCharHandle);
+  PRINTF("Service ENV_SENS added. Handle 0x%04X, TEMP Charac handle: 0x%04X, BUTTON Charac handle: 0x%04X, HUMID Charac handle: 0x%04X\n",envSensServHandle, tempCharHandle, buttonCharHandle, humidityCharHandle);
   return BLE_STATUS_SUCCESS;
 
 fail:
@@ -540,14 +540,14 @@ tBleStatus SensorServiceClass::Temp_Update(int16_t temp)
  * @param  int32_t Pressure in tenths of Pascal
  * @retval tBleStatus Status
  */
-tBleStatus SensorServiceClass::Press_Update(uint32_t press)
+tBleStatus SensorServiceClass::Button_Update(uint32_t button)
 {
   tBleStatus ret;
 
-  press_data = press;
+  button_data = button;
 
-  ret = aci_gatt_update_char_value(envSensServHandle, pressCharHandle, 0, 3,
-                                   (uint8_t*)&press);
+  ret = aci_gatt_update_char_value(envSensServHandle, buttonCharHandle, 0, 3,
+                                   (uint8_t*)&button);
 
   if (ret != BLE_STATUS_SUCCESS){
     PRINTF("Error while updating TEMP characteristic.\n") ;
@@ -714,8 +714,8 @@ void SensorServiceClass::Read_Request_CB(uint16_t handle)
                                         // a pop-up reports a "No valid characteristics found" error.
     Temp_Update(temp_data);
   }
-  else if(handle == pressCharHandle + 1){
-    Press_Update(press_data);
+  else if(handle == buttonCharHandle + 1){
+    Button_Update(button_data);
   }
   else if(handle == humidityCharHandle + 1){
     Humidity_Update(hum_data);

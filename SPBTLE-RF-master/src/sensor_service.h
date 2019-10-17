@@ -114,7 +114,7 @@ class SensorServiceClass
 
     tBleStatus Add_Environmental_Sensor_Service(void);
     tBleStatus Temp_Update(int16_t temp);
-    tBleStatus Press_Update(uint32_t press);
+    tBleStatus Button_Update(uint32_t button);
     tBleStatus Humidity_Update(uint16_t humidity);
     tBleStatus Swipe_Update(int16_t swipe);
     tBleStatus Tap_Update(int16_t tap);
@@ -136,7 +136,7 @@ class SensorServiceClass
 
     uint16_t sampleServHandle, TXCharHandle, RXCharHandle;
     uint16_t accServHandle, freeFallCharHandle, accCharHandle;
-    uint16_t envSensServHandle, tempCharHandle, pressCharHandle, humidityCharHandle, swipeCharHandle, tapCharHandle;
+    uint16_t envSensServHandle, tempCharHandle, buttonCharHandle, humidityCharHandle, swipeCharHandle, tapCharHandle;
 
     uint16_t timeServHandle, secondsCharHandle, minuteCharHandle;
     uint16_t motorServHandle, motorCharHandle;
@@ -150,7 +150,7 @@ class SensorServiceClass
 
     volatile AxesRaw_t  axes_data;
     volatile int16_t    temp_data;
-    volatile uint32_t    press_data;
+    volatile uint32_t    button_data;
     volatile uint16_t   hum_data;
     volatile int16_t swipe_data;
     volatile int16_t tap_data;
