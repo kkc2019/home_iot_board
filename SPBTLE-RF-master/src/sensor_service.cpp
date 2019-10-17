@@ -975,17 +975,36 @@ tBleStatus SensorServiceClass::Add_Motor_Service(void)
    * API description
   */
   ret =  aci_gatt_add_char(motorServHandle, UUID_TYPE_128, uuid, 4,
-                           CHAR_PROP_WRITE | CHAR_PROP_WRITE_WITHOUT_RESP, ATTR_PERMISSION_NONE, GATT_NOTIFY_ATTRIBUTE_WRITE,
-                           16, 1, &motorButtonCharHandle);
+                           CHAR_PROP_READ | CHAR_PROP_WRITE | CHAR_PROP_WRITE_WITHOUT_RESP, ATTR_PERMISSION_NONE, GATT_NOTIFY_READ_REQ_AND_WAIT_FOR_APPL_RESP | GATT_NOTIFY_ATTRIBUTE_WRITE,
+                           16, 1, &motorCharHandle);
   if (ret != BLE_STATUS_SUCCESS) goto fail;
 
-  PRINTF("Service Motor BUTTON added. Handle 0x%04X, Motor button Charac handle: 0x%04X\n",motorServHandle, motorButtonCharHandle);
+  PRINTF("Service Motor BUTTON added. Handle 0x%04X, Motor button Charac handle: 0x%04X\n",motorServHandle, motorCharHandle);
   return BLE_STATUS_SUCCESS;
 
 fail:
   PRINTF("Error while adding Motor service.\n");
   return BLE_STATUS_ERROR;
 }
+
+tBleStatus SensorServiceClass::Motor_Update()
+{
+  tBleStatus ret;
+
+  //temp_data = temp;
+
+  ret = aci_gatt_update_char_value(motorServHandle, motorCharHandle, 0, 2,
+                                   (uint8_t*)&motorState);
+
+  if (ret != BLE_STATUS_SUCCESS){
+    PRINTF("Error while updating Motor characteristic.\n") ;
+    return BLE_STATUS_ERROR ;
+  }
+  return BLE_STATUS_SUCCESS;
+
+}
+
+
 
 /**
  * @brief  This function is called attribute value corresponding to
@@ -1001,7 +1020,7 @@ void SensorServiceClass::Attribute_Modified_CB(uint16_t handle, uint8_t data_len
   UNUSED(att_data);
 
   /* If GATT client has modified 'LED button characteristic' value, toggle LED2 */
-  if(handle == motorButtonCharHandle + 1){
+  if(handle == motorCharHandle + 1){
       motorState = !motorState;
   }
 }

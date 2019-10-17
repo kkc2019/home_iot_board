@@ -118,6 +118,7 @@ class SensorServiceClass
     tBleStatus Humidity_Update(uint16_t humidity);
     tBleStatus Swipe_Update(int16_t swipe);
     tBleStatus Tap_Update(int16_t tap);
+    tBleStatus Motor_Update();
 
     tBleStatus Add_Time_Service(void);
     void       Update_Time_Characteristics(void);
@@ -138,7 +139,7 @@ class SensorServiceClass
     uint16_t envSensServHandle, tempCharHandle, pressCharHandle, humidityCharHandle, swipeCharHandle, tapCharHandle;
 
     uint16_t timeServHandle, secondsCharHandle, minuteCharHandle;
-    uint16_t motorServHandle, motorButtonCharHandle;
+    uint16_t motorServHandle, motorCharHandle;
 
   private:
     volatile uint16_t connection_handle = 0;

@@ -229,11 +229,12 @@ bool tap_detected() {
 void update_environment_data(){
   float humidity, temperature;
   float pressure, temperature_lps22hb;
-  float swipe, tap;
+  float swipe, tap, button;
   String swipeStr, tapStr;
 
   swipe = 0;
   tap = 0;
+  button = 0;
   
   Serial.println("swipe!!!?");
   Serial.println(swipe_detected());
@@ -284,16 +285,22 @@ void update_environment_data(){
   }
   SensorService.Tap_Update(tap);
 
- 
+  Serial.println("Now we update Motor value from board to python");
+  SensorService.Motor_Update();
 
   /*
   if (digitalRead(USER_BTN) == HIGH) {
-    tap = 1;
-    SensorService.Tap_Update(tap);
-    Serial.println(tap);
+    button = 1;
+    SensorService.Button_Update(button);
+    Serial.println("Button Pushed!!");
   }
-  //}
+  else {
+     button = 0;
+    SensorService.Button_Update(button);
+  }
   */
+
+  
 }
 
 
@@ -448,6 +455,7 @@ void loop() {
     if((millis() - previousSecond) >= 1000)
     {
       update_environment_data();
+      
       boolean pushdetected = SensorService.Motor_State();
       Serial.println("pushdetected  "+ (String)(pushdetected));
       previousSecond = millis();
